@@ -17,7 +17,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: external-attacher-runner
+  name: csi-hostpath-role
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumes"]
@@ -47,7 +47,7 @@ subjects:
     namespace: default
 roleRef:
   kind: ClusterRole
-  name: external-attacher-runner
+  name: csi-hostpath-role
   apiGroup: rbac.authorization.k8s.io
 
 ---
@@ -68,7 +68,7 @@ spec:
 kind: StatefulSet
 apiVersion: apps/v1beta1
 metadata:
-  name: csi-hostpath-driver
+  name: csi-hostpath-ext
 spec:
   serviceName: "csi-hostpath"
   replicas: 1
@@ -120,6 +120,34 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
+      volumes:
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi-hostpath
+            type: DirectoryOrCreate
+        - name: mountpoint-dir
+          hostPath:
+            path: /var/lib/kubelet/pods
+            type: Directory
+
+---
+
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: csi-hostpath-ds
+spec:
+  selector:
+    matchLabels:
+      app: csi-hostpath-driver
+  serviceName: csi-hostpath
+  template:
+    metadata:
+      labels:
+        app: csi-hostpath-driver
+    spec:
+      serviceAccount: csi-hostpath
+      containers:
         - name: hostpath-driver
           securityContext:
             privileged: true
@@ -154,4 +182,5 @@ spec:
           hostPath:
             path: /var/lib/kubelet/pods
             type: Directory
+
 
