@@ -92,22 +92,6 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
-        - name: csi-driver-registrar
-          imagePullPolicy: Always
-          image: docker.io/k8scsi/driver-registrar
-          args:
-            - "--v=5"
-            - "--csi-address=$(ADDRESS)"
-          env:
-            - name: ADDRESS
-              value: /csi/csi.sock
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-          volumeMounts:
-            - name: socket-dir
-              mountPath: /csi
         - name: csi-attacher
           imagePullPolicy: Always
           image: docker.io/k8scsi/csi-attacher:0.1
@@ -148,6 +132,22 @@ spec:
     spec:
       serviceAccount: csi-hostpath
       containers:
+        - name: csi-driver-registrar
+          imagePullPolicy: Always
+          image: docker.io/k8scsi/driver-registrar
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
         - name: hostpath-driver
           securityContext:
             privileged: true
