@@ -130,9 +130,6 @@ spec:
       labels:
         app: csi-hostpath-driver
     spec:
-      tolerations:
-        - key: node-role.kubernetes.io/master
-          effect: NoSchedule
       serviceAccount: csi-hostpath
       containers:
         - name: csi-driver-registrar
