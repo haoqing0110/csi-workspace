@@ -66,19 +66,21 @@ spec:
 
 ---
 kind: StatefulSet
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 metadata:
   name: csi-hostpath-driver
 spec:
   serviceName: "csi-hostpath"
   replicas: 1
+  selector:
+    matchLabels:
+      app: csi-hostpath-driver
   template:
     metadata:
       labels:
         app: csi-hostpath-driver
     spec:
       serviceAccount: csi-hostpath
-      nodeName: lpabon-e2e-debian-minion-group-j1vj
       containers:
         - name: csi-external-provisioner
           imagePullPolicy: Always
